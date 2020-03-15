@@ -60,6 +60,7 @@ float edgeBottom = -3.75f;
 GLuint fontTextureID;
 glm::vec3 fontPos1 = glm::vec3(-1.5f, 2.0f, 0);
 glm::vec3 fontPos2 = glm::vec3(-3.25f,0,0);
+glm::vec3 fontPos3 = glm::vec3(-2.75f, 1.0f, 0);
 
 std::vector<Entity> collisionChecksPlayer;
 std::vector<Entity> fillIn;
@@ -165,7 +166,7 @@ void Initialize() {
 
 	state.player = new Entity();
 	//state.player->position = glm::vec3(0, 3.25f,0);
-	state.player->position = glm::vec3(-1.0f, 0.0f, 0);
+	state.player->position = glm::vec3(0, 3.25f, 0);
 	state.player->movement = glm::vec3(0);
 	state.player->speed = 1.75f;
 	state.player->textureID = LoadTexture("Lunar Landing Box SS.png");
@@ -204,6 +205,7 @@ void Initialize() {
 	state.platforms[7].position = glm::vec3(4.5f, -3.25f, 0.0f);
 	state.platforms[8].position = glm::vec3(-4.5f, 1.25f, 0.0f);
 	state.platforms[9].position = glm::vec3(-3.5f, 1.25f, 0.0f);
+
 
 	state.success[0].position = glm::vec3(-2.5f, -3.25f, 0.0f);
 	state.success[1].position = glm::vec3(-1.5f, -3.25f, 0.0f);
@@ -335,6 +337,7 @@ void Render() {
 	state.player->Render(&program);
 	if (!start) {
 		DrawText(&program, fontTextureID, "Level: 1-1", .2f, 0.1f, fontPos1);
+		DrawText(&program, fontTextureID, "Pichu Landers", .3f, 0.1f, fontPos3);
 		DrawText(&program, fontTextureID, "Press Space To Start!", .2f, 0.1f, fontPos2);
 	}
 	else if (state.player->success) {
