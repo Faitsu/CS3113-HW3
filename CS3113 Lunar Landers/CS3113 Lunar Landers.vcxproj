@@ -142,6 +142,7 @@
     <Image Include="Lunar Landing Box SS.png" />
     <Image Include="pixel_font.png" />
     <Image Include="Sky.png" />
+    <Image Include="Sky2.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

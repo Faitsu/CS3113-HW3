@@ -1,5 +1,8 @@
+//Erica Chou 03/15/20
+//Entity.cpp file, sets up functions for various entities used within the game
+
 #include "Entity.h"
-Entity::Entity() { 
+Entity::Entity() { //constructor
 	position = glm::vec3(0);   
 	movement = glm::vec3(0);
 	acceleration = glm::vec3(0);
@@ -9,7 +12,7 @@ Entity::Entity() {
 }
 
 bool Entity::CheckCollision(Entity* other) {
-	if (isActive == false || other->isActive == false) { return false; }
+	//checks if object collided with another object and returns a bool
 	float xdist = fabs(position.x - other->position.x) - ((width + other->width) / 2.0f);
 	float ydist = fabs(position.y - other->position.y) - ((height + other->height) / 2.0f);
 
@@ -21,20 +24,18 @@ bool Entity::CheckCollision(Entity* other) {
 	return false;
 }
 
-void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { //messy b/c of platform success/fail logic
-	Entity* prev = NULL;
+void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { 
+	//Fixs entity position if we do have a collision in the y axis
 	float penetrationY = 0;
-	for (int i = 0; i < objectCount; i++) { //plan to check is get previous block to see if they are the same or different
+	for (int i = 0; i < objectCount; i++) { 
 		Entity *object = &objects[i];     
 		if (CheckCollision(object)) {
-			float xdist = fabs(position.x - object->position.x); //figuring out hitbox
 			float ydist = fabs(position.y - object->position.y);   //for figuring out the difference of the penetration
-			
 			float temp = fabs(ydist - (height / 2.0f) - (object->height / 2.0f));
 			if (penetrationY < temp) {
 				penetrationY = temp;
 			}
-			if (velocity.y > 0) {
+			if (velocity.y > 0) {//collision between an object occured on its top
 				position.y -= penetrationY;              
 				velocity.y = 0; 
 				collidedTop = true;
@@ -42,10 +43,10 @@ void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { //
 					fail = true;
 				}
 			}
-			else if (velocity.y < 0) { 
+			else if (velocity.y < 0) { //collision happened on bottom
 				collidedBottom = true;
-				object->collidedBottom = true;
-				if (entityType == PLAYER && object->entityType == PLATFORM) {//we are going to have extra checks in here to check how far the player block is from the platform
+				object->collidedTop = true;//for future checks
+				if (entityType == PLAYER && object->entityType == PLATFORM) {
 					fail = true;
 				}
 				if (entityType == PLAYER && object->entityType == SUCCESS_BLOCK) {
@@ -54,14 +55,13 @@ void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { //
 				}
 			}
 		}
-		prev = object;
 	}
-	if(success && fail){//tiebreaker logic
+	if(success && fail){//tiebreaker logic if player lands on both a success and reg block
 		Entity* platform=NULL;
 		Entity* splatform=NULL;
 		for (int j = 0; j < objectCount; j++) {
 			Entity* temp = &objects[j];
-			if (temp->collidedBottom) {
+			if (temp->collidedTop) {
 				if(temp->entityType == PLATFORM){
 					platform = temp;
 				}
@@ -70,8 +70,10 @@ void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { //
 				}
 			}
 		}
+		//grabs the distance from success block and regular block and compares the distance from both blocks
 		float xdistPlat = fabs(position.x - platform->position.x);
 		float xdistSucc = fabs(position.x - splatform->position.x);
+		//the smaller distance wins
 		if (xdistPlat <= xdistSucc) {
 			fail = true;
 			success = false;
@@ -81,13 +83,14 @@ void Entity::CheckCollisionsY(std::vector<Entity> objects, int objectCount) { //
 			fail = false;
 		}
 	}
-	if (collidedBottom) {
+	if (collidedBottom) {//updates at the end of all the checks
 		position.y += penetrationY;
 		velocity.y = 0;
 	}
 }
 
 void Entity::CheckCollisionsX(std::vector<Entity> objects, int objectCount) {
+	//fixes position of object from the x-axis
 	for (int i = 0; i < objectCount; i++) { 
 		Entity *object = &objects[i];    
 		if (CheckCollision(object)) {
@@ -120,44 +123,20 @@ void Entity::CheckCollisionsX(std::vector<Entity> objects, int objectCount) {
 }
 
 void Entity::Update(float deltaTime, std::vector<Entity>platforms, int platformCount) { 
-	if (success || fail) { //ends game
+	//updates entity
+	if (success || fail) { 
+		//end of game if success or fail so we do not want to update positions and such
 		return;
 	}
 
-	collidedTop = false;
-	collidedBottom = false;
-	collidedLeft = false;
-	collidedRight = false;
-	if (entityType == BACKGROUND) {
+	if (entityType == BACKGROUND) {//we only need this to happen to background to make this bigger
 		modelMatrix = glm::mat4(1.0f);
 		modelMatrix = glm::scale(modelMatrix, glm::vec3(10.0f, 7.5f, 0.0f));
 		return;
 	}
 	if (entityType == PLAYER) {
-		if (animIndices != NULL) {
-			if (glm::length(movement) == 0) {
-				idle = true;
-			}
-			else {
-				idle = false;
-			}
-
-			animTime += deltaTime;
-
-			if (animTime >= 0.25f) {
-
-				animTime = 0.0f;
-				animIndex++;
-
-				if (animIndex >= animFrames) {
-					animIndex = 0;
-				}
-
-			}
-		}
-
+		//movement logic
 		velocity.x = movement.x*speed;
-		//velocity.y = movement.y *speed;
 		velocity += acceleration * deltaTime;
 
 		position.y += velocity.y*deltaTime;
@@ -172,7 +151,7 @@ void Entity::Update(float deltaTime, std::vector<Entity>platforms, int platformC
 }
 
 void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID, int index) {
-
+	//draws sprite from a sprite sheet
 	float u = (float)(index % animCols) / (float)animCols;
 	float v = (float)(index / animCols) / (float)animRows;
 	
@@ -197,7 +176,7 @@ void Entity::DrawSpriteFromTextureAtlas(ShaderProgram *program, GLuint textureID
 }
 
 void Entity::Render(ShaderProgram* program) { 
-	if (!isActive) { return; }
+	//renders an entity
 	program->SetModelMatrix(modelMatrix);    
 	if (animIndices != NULL) {
 			DrawSpriteFromTextureAtlas(program, textureID, animIndices[animIndex]);
