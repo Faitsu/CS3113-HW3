@@ -1,0 +1,4 @@
+﻿  main.cpp
+c:\users\erica\source\repos\cs3113 lunar landers\cs3113 lunar landers\main.cpp(26): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+c:\users\erica\source\repos\cs3113 lunar landers\cs3113 lunar landers\main.cpp(97): warning C4018: '<': signed/unsigned mismatch
+  CS3113 Lunar Landers.vcxproj -> C:\Users\erica\source\repos\CS3113 Lunar Landers\Debug\CS3113 Lunar Landers.exe
